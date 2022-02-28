@@ -15,29 +15,17 @@ public abstract class QLearningStrategy implements Strategy{
 	protected double alpha;
 	
 	private boolean modeTrain;
-	
-	
-	
 
 	public QLearningStrategy(double epsilon, double gamma, double alpha) {
-		
 		this.epsilon = epsilon;
 		this.gamma = gamma;
 		this.alpha = alpha;
-		
-		
 	}
 	
 	
 	public AgentAction play(PacmanGame game, PositionAgent positionAgent, PositionAgent objectif) {
-		
 		return this.chooseAction(game);
 	}
-	
-	
-	
-	
-
 	
 	public abstract AgentAction chooseAction(PacmanGame state);
 	

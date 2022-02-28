@@ -20,28 +20,21 @@ public class PacmanGame extends Game  {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	
+
 	private static final int TOUR_MAX_INVINCIBLE = 10;
-	
-	
+
 	private static final int POINT_GUM = 10;
 	private static final int POINT_FANTOM = 50;
 	private static final int POINT_CAPSULE = 50;
 	private static final int POINT_DEAD = -100;
 	private static final int POINT_WIN = 100;
-	
-	
+
 	private Maze _maze;
 	private Maze _originalMaze;
-	
-	
-	
+
 	public Agent pacman;
 	private List<Agent> _agentsFantom;
 
-	
-	
 	private int score;
 
 	private boolean ghostsScarred;
@@ -49,10 +42,8 @@ public class PacmanGame extends Game  {
 
 	private int nbCapsule;
 	private int nbFood;
-	
 
 	boolean nightmareMode = false;
-	
 	
 	public PacmanGame(String chemin_maze, int maximum_laps, long speed) {
 		super(maximum_laps, speed);
@@ -60,8 +51,7 @@ public class PacmanGame extends Game  {
 	    this._maze = null;
 	    
 	    this.score = 0;
-	    
-	    
+
 		try {
 			_maze = new Maze(chemin_maze);
 		} catch (Exception e) {
@@ -76,7 +66,6 @@ public class PacmanGame extends Game  {
 		super(maximum_laps);
 	}
 
-
 	
 	public void initGameQLearning(Strategy behavior, boolean nightmareMode ) {
 		
@@ -89,8 +78,7 @@ public class PacmanGame extends Game  {
 		} else {
 			_agentsFantom = Factory.giveMeOnlyRandomFantom(_maze.getGhosts_start());
 		}
-		
-		
+
 		pacman = Factory.playerQlearning(_maze.getPacman_start().get(0), behavior);
 		
 		ghostsScarred = false;
@@ -103,22 +91,16 @@ public class PacmanGame extends Game  {
 		nbFood = countFoods(_maze);
 		
 	}
-	
-	
-	
+
 	public int countCapsules(Maze maze) {
-		
 		int nb = 0;
 		
 		for(int i =0; i < maze.getSizeX(); i++) {
-			
 			for(int j =0; j < maze.getSizeY(); j++) {
-				
+
 				if(maze.isCapsule(i, j)) {
-					
 					nb += 1;
 				}
-				
 			}
 		}
 		
@@ -177,8 +159,6 @@ public class PacmanGame extends Game  {
 				this.nbFood -= 1;
 			}
 		}
-
-
 	}
 
 	public boolean samePosition(Agent a1, Agent a2) {
@@ -186,7 +166,6 @@ public class PacmanGame extends Game  {
 				&& (a1.get_position().getY() == a2.get_position().getY());
 	}
 
-	
 	public void eatCapsule(int x, int y) {
 		// on commence l'invincibilité
 		nb_tour_invincible = TOUR_MAX_INVINCIBLE;
@@ -203,35 +182,29 @@ public class PacmanGame extends Game  {
 		score += POINT_GUM;
 		_maze.setFood(x, y, false);
 	}
-
 	
 	@Override
 	public void reinitializeGameStat() {
-
 		this._maze = SerializationUtils.clone(this._originalMaze);
 		
 		ghostsScarred = false;
 		nb_tour_invincible = 0;
 		score = 0;
 
-
 		if(nightmareMode) {
 			_agentsFantom = Factory.giveMeOnlyHuntersFantom(_maze.getGhosts_start());
 		} else {
 			_agentsFantom = Factory.giveMeOnlyRandomFantom(_maze.getGhosts_start());
 		}
-		
-		
+
 		pacman.set_alive(true);
 		pacman.set_position(pacman.get_first_position());
 		
 		nbCapsule = countCapsules(_maze);
 		nbFood = countFoods(_maze);
-		
-		
+
 		notifyObservers();
 	}
-
 
 	@Override
 	public void takeTurn() {
@@ -245,19 +218,16 @@ public class PacmanGame extends Game  {
 			}
 		}
 
-		
 		double reward =  - this.score;
 
 		AgentAction a;
 		
 		PacmanGame state = SerializationUtils.clone(this);
-		
-		
+
 		a = pacman.play(this, ghostsScarred, null);
 		if (isLegalMove(pacman, a)) {
 			moveAgent(pacman, a);
 		}
-
 
 		if(_agentsFantom.size() > 0) {
 			
@@ -265,13 +235,11 @@ public class PacmanGame extends Game  {
 			while (iterator.hasNext()) {
 				
 				Agent fantom = (Agent)iterator.next();
-				
 				boolean isRemoved = false;
 						
 				if(samePosition(pacman,fantom )) {
 					
 					if (isGhostsScarred()) {
-						
 						score += POINT_FANTOM;
 						iterator.remove();
 						isRemoved = true;
@@ -280,7 +248,6 @@ public class PacmanGame extends Game  {
 						
 						score += PacmanGame.POINT_DEAD;
 						pacman.set_alive(false);
-						
 					}
 				}
 				
@@ -313,11 +280,9 @@ public class PacmanGame extends Game  {
 		notifyObservers();
 		
 		boolean isFinalState = checkIfFinalState();
-		
-		
+
 		reward += this.score;
-		
-		
+
 		pacman.update(state, this,  a, reward, isFinalState);
 		
 		
@@ -337,7 +302,6 @@ public class PacmanGame extends Game  {
 			fin_gum = false;
 		}
 
-
 		if (pacman.is_alive()) {
 			fin_pacman = false;
 		} else {
@@ -351,14 +315,10 @@ public class PacmanGame extends Game  {
 		return (fin_gum || fin_pacman);
 	}
 
-
 	@Override
 	public void gameOver() {
 		super.gameOver();
-	
 	}
-
-
 
 	public List<Agent> get_agentsFantom() {
 		return _agentsFantom;
@@ -411,7 +371,6 @@ public class PacmanGame extends Game  {
 	}
 	
 	public int getNbFood() {
-		
 		return this.nbFood;
 	}
 
