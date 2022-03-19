@@ -1,25 +1,26 @@
 package strategy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import agent.AgentAction;
 import motor.PacmanGame;
 
 public class TabuLarQLearning extends QLearningStrategy {
 	private final double epsilon, gamma, alpha;
-	private final double[][] tab;
+	private final HashMap<String, Double> tab;
+	private final int nActions;
 
 	public TabuLarQLearning(double epsilon, double gamma, double alpha, int slotsX, int slotsY) {
 		super(epsilon, gamma, alpha);
 
-		this.epsilon = epsilon;
-		this.alpha = alpha;
-		this.gamma = gamma;
+		this.epsilon = epsilon; // Random
+		this.alpha = alpha; // Apprentissage
+		// Alpha = 1 en cauchemar
+		// 0.1 sinon
+		this.gamma = gamma; // Récompense
 
-		this.tab = new double[slotsX * slotsY][5];
-		// TODO : Essayer de remplacer double[][] tab par une HashMap afin de prendre en compte l'ensemble des états possibles du jeu (Gum, Monstres, ..)
+		this.tab = new HashMap<>();
+		this.nActions = 4;
 	}
 
 	@Override
@@ -28,7 +29,7 @@ public class TabuLarQLearning extends QLearningStrategy {
 
 		List<AgentAction> legalActions = new ArrayList<>();
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < this.nActions; i++) {
 			if (state.isLegalMove(state.pacman, new AgentAction(i))) {
 				legalActions.add(new AgentAction(i));
 			}
@@ -37,10 +38,7 @@ public class TabuLarQLearning extends QLearningStrategy {
 		if (Math.random() < epsilon) {
 			action = legalActions.get(new Random().nextInt(legalActions.size()));
 		} else {
-			int index_x = state.pacman._position.getX();
-			int index_y = state.pacman._position.getY();
-
-			action = new AgentAction(getMaxFromTabForState((index_x * index_y - 1)));
+			action = new AgentAction(getMaxFromTabForState(state));
 		}
 
 		return action;
@@ -58,32 +56,74 @@ public class TabuLarQLearning extends QLearningStrategy {
 			maxQNextState = getMaxQ(nextState);
 		}
 
-		this.tab[(state.pacman._position.getX() * state.pacman._position.getY() - 1)][action.get_direction()] = reward + gamma * maxQNextState;
+		String code = getMapCode(state, action.get_direction());
+		tab.put(code, (1-alpha) * this.tab.getOrDefault(code, 0.0) + alpha * (reward + gamma * maxQNextState));
+//		System.out.println(tab);
 	}
 
-	public int getMaxFromTabForState(int stateLine) {
-		int max_index = 0;
+	private String getMapCode(PacmanGame state, int direction){
+		StringBuilder code = new StringBuilder();
+		int cell = 0;
+		for(int i = 0; i < state.getMaze().getSizeX(); i++){
+			for(int j = 0; j < state.getMaze().getSizeY(); j++){
+				if(state.getMaze().isWall(i, j)){
+					continue;
+				}
 
-		for (int i = 0; i < 5; ++i) {
-			if (this.tab[stateLine][i] > max_index) {
-				max_index = i;
+				int x = i;
+				int y = j;
+
+				int codeAction = 0;
+				if(state.getMaze().isFood(x,y)) codeAction = 1;
+				else if(state.getPostionFantom().stream().anyMatch(e -> e.getX() == x && e.getY() == y)) codeAction = 2;
+				else if(state.getMaze().isCapsule(x,y)) codeAction = 3;
+				else if(state.getPostionFantom().stream().anyMatch(e -> e.getX() == x && e.getY() == y)) codeAction = 4;
+
+				code.append(codeAction);
+				code.append(cell);
+				cell++;
 			}
 		}
+		code.append(state.isGhostsScarred() ? 1 : 0);
+		code.append(direction);
 
-		return max_index;
+		return code.toString();
 	}
 
-	public double getMaxQ(PacmanGame state) {
-		double max_value = 0;
 
-		for (int i = 0; i < 5; ++i) {
-			if (this.tab[(state.pacman._position.getX() * state.pacman._position.getY() - 1)][i] > max_value) {
-				max_value = this.tab[(state.pacman._position.getX() * state.pacman._position.getY() - 1)][i];
+	private double getMaxQ(PacmanGame state) {
+		double max_value = 0;
+		String code = getMapCode(state, 5);
+		code = code.substring(0, code.length()-1);
+
+		for (int i = 0; i < this.nActions; i++) {
+			String tCode = code + i;
+			if(tab.containsKey(tCode) && tab.get(tCode) > max_value){
+				max_value = tab.get(tCode);
 			}
 		}
 
 		return max_value;
 	}
 
+	public int getMaxFromTabForState(PacmanGame state) {
+		int max_index = 5;
+
+		String code = getMapCode(state, 5);
+		code = code.substring(0, code.length()-1);
+
+		for (int i = 0; i < this.nActions; i++) {
+			if (state.isLegalMove(state.pacman, new AgentAction(i))) {
+				String codeI = code + i;
+				String codeMax = code + max_index;
+
+				if (tab.containsKey(codeI) && tab.containsKey(codeMax) && tab.get(codeI) > tab.get(codeMax)) {
+					max_index = i;
+				}
+			}
+		}
+
+		return max_index;
+	}
 
 }

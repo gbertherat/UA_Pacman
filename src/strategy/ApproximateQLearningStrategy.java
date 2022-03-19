@@ -1,16 +1,7 @@
 package strategy;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import agent.Agent;
 import agent.AgentAction;
-import agent.PositionAgent;
-import motor.Maze;
 import motor.PacmanGame;
-
-
-import java.util.Random;
 
 
 public class ApproximateQLearningStrategy extends QLearningStrategy{

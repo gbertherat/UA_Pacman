@@ -15,14 +15,15 @@ import view.View;
 public class main_standardMode {
 
 	public static void main(String[] args) {
-		
 		double gamma = 0.95;
 		double epsilon = 0.1;
-		double alpha = 0.01;
 		boolean nightmareMode = true;
+		double alpha = nightmareMode ? 1 : 0.5;
 
 		//String chemin_maze = "src/layout/very_smallMaze.lay";
-		String chemin_maze = "src/layout/very_very_smallMaze.lay";
+		//String chemin_maze = "src/layout/very_very_smallMaze.lay";
+		String chemin_maze = "src/layout/small_openSearch.lay";
+		//String chemin_maze = "src/layout/originalClassic.lay";
 
 	    Maze _maze = null;
 	    
@@ -37,28 +38,28 @@ public class main_standardMode {
 		QLearningStrategy strat = new TabuLarQLearning(epsilon, gamma, alpha, _maze.getSizeX() - 2, _maze.getSizeY() - 2);
 
 		//Nombre de simulations séquentielles lancees pour calculer la recompense moyenne en mode train
-		int Ntrain = 100;
+		int Ntrain = 1000;
 
 		//Nombre de simulations parallèle lancees pour calculer la recompense moyenne en mode test
-		int Ntest = 100;
+		int Ntest = 1000;
 
 		//Nombre max de tours d'une partie de pacman
-		int maxTurnPacmanGame = 200;
+		int maxTurnPacmanGame = 300;
 		
 		while(true) {
 
 			strat.setModeTrain(false);
-			System.out.println("Visualization mode");
+//			System.out.println("Visualization mode");
 			vizualize(maxTurnPacmanGame, chemin_maze, strat, nightmareMode);
 			
 			//Evaluation du score moyen de la strategie
 			strat.setModeTrain(false);
-			System.out.println("Eval average score - test mode");
+//			System.out.println("Eval average score - test mode");
 			eval(Ntest, maxTurnPacmanGame, chemin_maze, strat, nightmareMode);
 			
 			//Joue N simulations du jeu en mode apprentissage
 			strat.setModeTrain(true);
-			System.out.println("Play and collect examples - train mode");
+//			System.out.println("Play and collect examples - train mode");
 			learn(Ntrain, maxTurnPacmanGame, chemin_maze, strat, nightmareMode);
 		}
 	}
@@ -83,6 +84,7 @@ public class main_standardMode {
 		}
 
 		System.out.println("Average global reward - mode train: " + globalReward/nbSimulations);
+		System.out.println("-----------------");
 
 //		ArrayList<TrainExample> trainExamples = new ArrayList<TrainExample>();
 
@@ -105,7 +107,7 @@ public class main_standardMode {
 			pacmanGames.add(_motor);
 		}
 
-		System.out.println("Launch " + nbSimulations + " pacman games");
+//		System.out.println("Launch " + nbSimulations + " pacman games");
 		
 		for(int i = 0; i < nbSimulations; i++ ) {
 			
