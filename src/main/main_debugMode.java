@@ -12,15 +12,16 @@ import view.View;
 public class main_debugMode {
 
 	public static void main(String[] args) {
-		
+
 		double gamma = 0.95;
 		double epsilon = 0.1;
-		double alpha = 0.1;
-		
-		boolean nightmareMode = false;
+		boolean nightmareMode = true;
+		double alpha = nightmareMode ? 1 : 0.5;
 
-//		String chemin_maze = "src/layout/very_very_smallMaze.lay";
-		String chemin_maze = "src/layout/very_smallMaze.lay";
+//		//String chemin_maze = "src/layout/very_smallMaze.lay";
+//		//String chemin_maze = "src/layout/very_very_smallMaze.lay";
+		String chemin_maze = "src/layout/small_openSearch.lay";
+//		//String chemin_maze = "src/layout/originalClassic.lay";
 		
 		PacmanGame _motor = new PacmanGame(chemin_maze, 1000, (long) 100);
 

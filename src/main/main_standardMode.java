@@ -16,13 +16,13 @@ public class main_standardMode {
 
 	public static void main(String[] args) {
 		double gamma = 0.95;
-		double epsilon = 0.1;
-		boolean nightmareMode = true;
-		double alpha = nightmareMode ? 1 : 0.5;
+		double epsilon = 0.2;
+		boolean nightmareMode = false;
+		double alpha = nightmareMode ? 0.9 : 0.5;
 
-		//String chemin_maze = "src/layout/very_smallMaze.lay";
+		String chemin_maze = "src/layout/very_smallMaze.lay";
 		//String chemin_maze = "src/layout/very_very_smallMaze.lay";
-		String chemin_maze = "src/layout/small_openSearch.lay";
+		//String chemin_maze = "src/layout/small_openSearch.lay";
 		//String chemin_maze = "src/layout/originalClassic.lay";
 
 	    Maze _maze = null;
@@ -38,13 +38,13 @@ public class main_standardMode {
 		QLearningStrategy strat = new TabuLarQLearning(epsilon, gamma, alpha, _maze.getSizeX() - 2, _maze.getSizeY() - 2);
 
 		//Nombre de simulations séquentielles lancees pour calculer la recompense moyenne en mode train
-		int Ntrain = 1000;
+		int Ntrain = 500;
 
 		//Nombre de simulations parallèle lancees pour calculer la recompense moyenne en mode test
-		int Ntest = 1000;
+		int Ntest = 500;
 
 		//Nombre max de tours d'une partie de pacman
-		int maxTurnPacmanGame = 300;
+		int maxTurnPacmanGame = 200;
 		
 		while(true) {
 

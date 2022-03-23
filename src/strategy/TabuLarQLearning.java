@@ -1,13 +1,14 @@
 package strategy;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import agent.AgentAction;
 import motor.PacmanGame;
 
 public class TabuLarQLearning extends QLearningStrategy {
 	private final double epsilon, gamma, alpha;
-	private final HashMap<String, Double> tab;
+	private final HashMap<String, double[]> tab;
 	private final int nActions;
 
 	public TabuLarQLearning(double epsilon, double gamma, double alpha, int slotsX, int slotsY) {
@@ -20,7 +21,7 @@ public class TabuLarQLearning extends QLearningStrategy {
 		this.gamma = gamma; // Récompense
 
 		this.tab = new HashMap<>();
-		this.nActions = 4;
+		this.nActions = 5;
 	}
 
 	@Override
@@ -56,12 +57,14 @@ public class TabuLarQLearning extends QLearningStrategy {
 			maxQNextState = getMaxQ(nextState);
 		}
 
-		String code = getMapCode(state, action.get_direction());
-		tab.put(code, (1-alpha) * this.tab.getOrDefault(code, 0.0) + alpha * (reward + gamma * maxQNextState));
-//		System.out.println(tab);
+		String code = getMapCode(state);
+		if(!tab.containsKey(code)){
+			tab.put(code, new double[this.nActions]);
+		}
+		tab.get(code)[action.get_direction()] = (1-alpha) * this.tab.get(code)[action.get_direction()] + alpha * (reward + gamma * maxQNextState);
 	}
 
-	private String getMapCode(PacmanGame state, int direction){
+	private String getMapCode(PacmanGame state){
 		StringBuilder code = new StringBuilder();
 		int cell = 0;
 		for(int i = 0; i < state.getMaze().getSizeX(); i++){
@@ -85,7 +88,6 @@ public class TabuLarQLearning extends QLearningStrategy {
 			}
 		}
 		code.append(state.isGhostsScarred() ? 1 : 0);
-		code.append(direction);
 
 		return code.toString();
 	}
@@ -93,13 +95,11 @@ public class TabuLarQLearning extends QLearningStrategy {
 
 	private double getMaxQ(PacmanGame state) {
 		double max_value = 0;
-		String code = getMapCode(state, 5);
-		code = code.substring(0, code.length()-1);
+		String code = getMapCode(state);
 
 		for (int i = 0; i < this.nActions; i++) {
-			String tCode = code + i;
-			if(tab.containsKey(tCode) && tab.get(tCode) > max_value){
-				max_value = tab.get(tCode);
+			if(tab.containsKey(code) && tab.get(code)[i] > max_value){
+				max_value = tab.get(code)[i];
 			}
 		}
 
@@ -107,18 +107,16 @@ public class TabuLarQLearning extends QLearningStrategy {
 	}
 
 	public int getMaxFromTabForState(PacmanGame state) {
-		int max_index = 5;
+		int max_index = 0;
+		String code = getMapCode(state);
 
-		String code = getMapCode(state, 5);
-		code = code.substring(0, code.length()-1);
+		if(tab.containsKey(code)) {
+			Integer[] indices = IntStream.range(0, tab.get(code).length).boxed().toArray(Integer[]::new);
+			Arrays.sort(indices, Comparator.<Integer>comparingDouble(i -> tab.get(code)[i]).reversed());
 
-		for (int i = 0; i < this.nActions; i++) {
-			if (state.isLegalMove(state.pacman, new AgentAction(i))) {
-				String codeI = code + i;
-				String codeMax = code + max_index;
-
-				if (tab.containsKey(codeI) && tab.containsKey(codeMax) && tab.get(codeI) > tab.get(codeMax)) {
-					max_index = i;
+			for(int indice : indices){
+				if(state.isLegalMove(state.pacman, new AgentAction(indice))){
+					return indice;
 				}
 			}
 		}
