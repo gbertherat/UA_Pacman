@@ -10,7 +10,7 @@ import motor.PacmanGame;
 
 public abstract class QLearningStrategy implements Strategy{
 
-	protected double epsilon;
+	public double epsilon;
 	protected double gamma;
 	protected double alpha;
 	

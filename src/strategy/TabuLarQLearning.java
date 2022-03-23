@@ -27,7 +27,6 @@ public class TabuLarQLearning extends QLearningStrategy {
 	@Override
 	public AgentAction chooseAction(PacmanGame state) {
 		AgentAction action ;
-
 		List<AgentAction> legalActions = new ArrayList<>();
 
 		for (int i = 0; i < this.nActions; i++) {
@@ -107,7 +106,6 @@ public class TabuLarQLearning extends QLearningStrategy {
 	}
 
 	public int getMaxFromTabForState(PacmanGame state) {
-		int max_index = 0;
 		String code = getMapCode(state);
 
 		if(tab.containsKey(code)) {
@@ -121,7 +119,7 @@ public class TabuLarQLearning extends QLearningStrategy {
 			}
 		}
 
-		return max_index;
+		return 0;
 	}
 
 }
