@@ -16,13 +16,13 @@ public class main_standardMode {
 
 	public static void main(String[] args) {
 		double gamma = 0.98;
-		double epsilon = 0.225;
+		double epsilon = 0.01;
+		double alpha = 0.01;
 		boolean nightmareMode = true;
-		double alpha = nightmareMode ? 0.9 : 0.1;
 
 		//String chemin_maze = "src/layout/very_smallMaze.lay";
 		//String chemin_maze = "src/layout/very_very_smallMaze.lay";
-		//String chemin_maze = "src/layout/small_openSearch.lay";
+//		String chemin_maze = "src/layout/small_openSearch.lay";
 		String chemin_maze = "src/layout/originalClassic.lay";
 
 	    Maze _maze = null;
@@ -34,7 +34,7 @@ public class main_standardMode {
 			e.printStackTrace();
 		}
 
-		QLearningStrategy strat = new ApproximateQLearningStrategy(epsilon, gamma, alpha, 4);
+		QLearningStrategy strat = new ApproximateQLearningStrategy(epsilon, gamma, alpha);
 		//QLearningStrategy strat = new TabuLarQLearning(epsilon, gamma, alpha, _maze.getSizeX() - 2, _maze.getSizeY() - 2);
 
 		//Nombre de simulations séquentielles lancees pour calculer la recompense moyenne en mode train
@@ -44,7 +44,7 @@ public class main_standardMode {
 		int Ntest = 500;
 
 		//Nombre max de tours d'une partie de pacman
-		int maxTurnPacmanGame = 200;
+		int maxTurnPacmanGame = 500;
 		
 		while(true) {
 			strat.setModeTrain(false);
@@ -54,13 +54,11 @@ public class main_standardMode {
 			//Evaluation du score moyen de la strategie
 			strat.setModeTrain(false);
 //			System.out.println("Eval average score - test mode");
-			strat.epsilon = 0;
 			eval(Ntest, maxTurnPacmanGame, chemin_maze, strat, nightmareMode);
 
 			//Joue N simulations du jeu en mode apprentissage
 			strat.setModeTrain(true);
 //			System.out.println("Play and collect examples - train mode");
-			strat.epsilon = epsilon;
 			learn(Ntrain, maxTurnPacmanGame, chemin_maze, strat, nightmareMode);
 		}
 	}
